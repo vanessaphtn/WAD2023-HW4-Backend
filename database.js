@@ -2,7 +2,7 @@ const Pool = require('pg').Pool;
 
 const pool = new Pool({
     user: "postgres",
-    password: "parool", //add your password
+    password: "V4ness4", //add your password
     database: "testWad",
     host: "localhost",
     port: "5433" //vb peaks olema 5432
@@ -38,3 +38,17 @@ execute(createTblQuery).then(result => {
 });
 
 module.exports = pool;
+
+const createPostsTblQuery = `
+    CREATE TABLE IF NOT EXISTS "posts" (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        body TEXT NOT NULL,
+        date TIMESTAMP NOT NULL,
+        user_id uuid REFERENCES users(id)
+    );`;
+
+execute(createPostsTblQuery).then(result => {
+    if (result) {
+        console.log('Table "posts" is created');
+    }
+});

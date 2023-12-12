@@ -125,3 +125,49 @@ app.get('/auth/logout', (req, res) => {
     console.log('delete jwt request arrived');
     res.status(202).clearCookie('jwt').json({ "Msg": "cookie cleared" }).send
 });
+
+// Add a new post
+app.post('/posts', async(req, res) => {
+    try {
+        console.log("A request to add a new post has arrived");
+        const { body, date } = req.body;
+
+        // Get the user id from the JWT
+        const token = req.cookies.jwt;
+        const decodedToken = jwt.verify(token, secret);
+        const userId = decodedToken.id;
+
+        const newPost = await pool.query(
+            "INSERT INTO posts(body, date, user_id) values ($1, $2, $3) RETURNING*", [body, date, userId]
+        );
+        console.log(newPost.rows[0].id);
+
+        res.status(201).json({ post_id: newPost.rows[0].id });
+    } catch (err) {
+        console.error(err.message);
+        res.status(400).send(err.message);
+    }
+});
+
+// Get all posts
+app.get('/posts', async(req, res) => {
+    try {
+        console.log("A request to get all posts has arrived");
+
+        // Get the user id from the JWT
+        const token = req.cookies.jwt;
+        const decodedToken = jwt.verify(token, secret);
+        const userId = decodedToken.id;
+
+        const posts = await pool.query(
+            "SELECT * FROM posts"
+        );
+        console.log(posts.rows);
+
+        res.status(200).json(posts.rows);
+    } catch (err) {
+        console.error(err.message);
+        res.status(400).send(err.message);
+    }
+});
+
