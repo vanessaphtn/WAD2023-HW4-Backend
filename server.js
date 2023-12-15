@@ -171,3 +171,44 @@ app.get('/posts', async(req, res) => {
     }
 });
 
+app.delete('/posts', async(req,res) => {
+    try {
+        console.log("Delete all post request has arrived")
+
+        const deletepost = await pool.query(
+            "DELETE FROM posts"
+        );
+        res.json(deletepost);
+    } catch (err){
+        console.error(err.message);
+    }
+});
+app.put('/posts/:id', async(req, res) => {
+    try {
+        console.log("A request to update a post has arrived");
+
+        const { id } = req.params;
+        const post = req.body;
+
+        const updatePost = await pool.query(
+            "UPDATE posts SET (body) = ($2) WHERE id = $1"
+        );
+        console.log(updatePost);
+        res.json(updatePost);
+    } catch (err) {
+        console.error(err.message);
+    }
+});
+
+app.delete('/posts/:id', async(req,res) => {
+    try {
+        console.log("Delete a post request has arrived")
+
+        const deletepost = await pool.query(
+            "DELETE FROM posts WHERE id = $1"
+        );
+        res.json(deletepost);
+    } catch (err){
+        console.error(err.message);
+    }
+});
