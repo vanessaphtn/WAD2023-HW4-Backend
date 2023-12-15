@@ -200,7 +200,7 @@ app.put('/posts/:id', async(req, res) => {
     }
 });
 
-app.delete('/posts/:id', async(req,res) => {
+app.delete('/posts/:postId', async(req,res) => {
     try {
         console.log("Delete a post request has arrived")
 
