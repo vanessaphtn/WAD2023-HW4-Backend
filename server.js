@@ -188,10 +188,11 @@ app.put('/posts/:id', async(req, res) => {
         console.log("A request to update a post has arrived");
 
         const { id } = req.params;
-        const post = req.body;
+        const { body } = req.body;
 
         const updatePost = await pool.query(
-            "UPDATE posts SET (body) = ($2) WHERE id = $1"
+            "UPDATE posts SET body = $1 WHERE id = $2",
+            [body, id]
         );
         console.log(updatePost);
         res.json(updatePost);
@@ -200,15 +201,33 @@ app.put('/posts/:id', async(req, res) => {
     }
 });
 
-app.delete('/posts/:postId', async(req,res) => {
+app.delete('/posts/:postId', async (req, res) => {
     try {
-        console.log("Delete a post request has arrived")
+        console.log("Delete a post request has arrived");
+
+        const { postId } = req.params;
+
+        // Get the user id from the JWT
+        const token = req.cookies.jwt;
+        const decodedToken = jwt.verify(token, secret);
+        const userId = decodedToken.id;
+
+        // Check if the post belongs to the authenticated user
+        const post = await pool.query("SELECT * FROM posts WHERE id = $1 AND user_id = $2", [postId, userId]);
+
+        if (post.rows.length === 0) {
+            // If post does not belong to the user or does not exist, return an error
+            return res.status(403).json({ error: "Unauthorized action" });
+        }
 
         const deletepost = await pool.query(
-            "DELETE FROM posts WHERE id = $1"
+            "DELETE FROM posts WHERE id = $1",
+            [postId]
         );
+
         res.json(deletepost);
-    } catch (err){
+    } catch (err) {
         console.error(err.message);
+        res.status(500).send(err.message);
     }
 });
